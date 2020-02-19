@@ -24,20 +24,21 @@ function DragAndDrop() {
   const [dragItem, setDragItem] = useState(null);
   const { width } = useWindowSize();
   const itemPerRow = 8;
-  const containerWidth = width * 60 / 100;
+  const containerWidth = width;
   const itemWidth = containerWidth / itemPerRow;
   const handlePressItem = (row, col) => e => {
     if (e.button === 0) {
       const clonedItem = e.currentTarget.cloneNode(true);
       const rect = e.currentTarget.getBoundingClientRect();
-  
+
       clonedItem.style.pointerEvents = 'none';
       clonedItem.style.position = 'fixed';
-      clonedItem.style.left = `${rect.left - 5}px`;
-      clonedItem.style.top = `${rect.top - 5}px`;
+      clonedItem.style.left = `${rect.left}px`;
+      clonedItem.style.top = `${rect.top}px`;
+      clonedItem.style.zIndex = 3;
       document.body.appendChild(clonedItem);
       setIsPressing(true);
-      setDelta([e.pageX - rect.left, e.pageY - rect.top]);
+      setDelta([e.pageX - (rect.left + window.scrollX), e.pageY - (rect.top + window.scrollY)]);
       setDragItem(clonedItem);
       setSelectedItemIdx([row, col]);
     }
@@ -75,8 +76,8 @@ function DragAndDrop() {
         return [0, 0];
       }));
 
-      dragItem.style.left = `${curXPos}px`;
-      dragItem.style.top = `${curYPos}px`;
+      dragItem.style.left = `${curXPos - window.scrollX}px`;
+      dragItem.style.top = `${curYPos - window.scrollY}px`;
       setGridPos(newGridPos);
     }
   }
@@ -102,6 +103,7 @@ function DragAndDrop() {
             yPos={gridPos[rowIdx][colIdx][1]}
             isSelected={rowIdx === selectedItemIdx[0] && colIdx === selectedItemIdx[1]}
             isAnimating={isPressing}
+            isSwap={gridPos[rowIdx][colIdx][0] || gridPos[rowIdx][colIdx][1]}
             onMouseDown={handlePressItem(rowIdx, colIdx)}
           >
             {item}
